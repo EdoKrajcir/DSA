@@ -23,132 +23,94 @@ typedef struct plna_hlavicka
 
 char *start;
 
+
 void *memory_alloc(unsigned int size)
 {
-
-	int a, volnych = 0, odstup = 0, posledny = 0;
-	VOLNA_HLAVICKA *pomocny, *najlepsi,*pomodst;
 	MAIN_HLAVICKA *hlavna_hlavicka;
-	VOLNA_HLAVICKA *volna_hlavicka;
-	PLNA_HLAVICKA *novy, *vrat;
+	VOLNA_HLAVICKA *pom, *prev, *next;
+	PLNA_HLAVICKA *plny;
+	
 	hlavna_hlavicka = (char*)start;
-	volna_hlavicka = (char*)hlavna_hlavicka->zaciatok;
-	pomocny = hlavna_hlavicka->zaciatok;
-	najlepsi = NULL;
-	while (pomocny != NULL)
+	pom = (char*)hlavna_hlavicka->zaciatok;
+	prev = (char*)hlavna_hlavicka;
+	while (pom != NULL)
 	{
-		pomocny = pomocny->next;
-		volnych++;
+		next = pom->next;
+
+		//1 - zapisujem rovnako velke;
+		if (pom->velkost == sizeof(PLNA_HLAVICKA) * 2 + size)
+		{
+			plny = (char*)pom;
+			prev->next = (char*)next;
+			plny->velkost = -size;
+			plny = plny + 2;
+			return plny;
+		}
+
+		//2 - zapisujem mensie ale nie o dost mensie;
+		if ((pom->velkost > sizeof(PLNA_HLAVICKA) * 2 + size) && (pom->velkost < sizeof(PLNA_HLAVICKA) * 2 + size + sizeof(VOLNA_HLAVICKA) + MIN_ZAPIS))
+		{
+			plny = (char*)pom;
+			prev->next = (char*)next;
+			plny->velkost = -(plny->velkost) -8;
+			plny = plny + 2;
+			return plny;
+		}
+
+		//3 - zapisujem mensie - sekam z volneho bloku;
+		if (pom->velkost >= sizeof(PLNA_HLAVICKA) * 2 + size + sizeof(VOLNA_HLAVICKA) + MIN_ZAPIS)
+		{
+			plny = (char*)pom;
+			pom = (char*)pom + sizeof(PLNA_HLAVICKA) * 2 + size;
+			pom->velkost = plny->velkost - sizeof(PLNA_HLAVICKA) * 2 - size;
+			prev->next = (char*)pom;
+			pom->next = next;
+			plny->velkost = -size;
+			plny = plny + 2;
+			return plny;
+		}
+
+		prev = (char*)pom;
+		pom = (char*)next;
 	}
-	pomocny = hlavna_hlavicka->zaciatok;
-	for (a = 0; a < volnych; a++)
-	{
-		if (pomocny->velkost == size + sizeof(VOLNA_HLAVICKA))
-		{
-			najlepsi = pomocny;
-			break;
-			posledny++;
-		}
-
-		if ((char*)pomocny->velkost > size + sizeof(PLNA_HLAVICKA) * 2 + sizeof(VOLNA_HLAVICKA) + MIN_ZAPIS)
-		{
-			najlepsi = pomocny;
-			break;
-			//if ((odstup == volnych - 1) && ())pomocny=pomocny;
-		}
-		pomocny = pomocny->next;
-		odstup++;
-	}
-
-	if (najlepsi == NULL) return NULL;
-	else if ((char*)najlepsi + 8 + size <= (char*)hlavna_hlavicka + hlavna_hlavicka->velkost)
-	{
-		if ((posledny = 0) && (volnych != 1))
-		{
-			novy = najlepsi;
-			//novy = pomocny;
-			pomocny = (char*)novy + sizeof(PLNA_HLAVICKA) * 2 + size;
-			pomocny->velkost = najlepsi->velkost - sizeof(PLNA_HLAVICKA) * 2 - size - sizeof(VOLNA_HLAVICKA);
-			if (hlavna_hlavicka->zaciatok == najlepsi) hlavna_hlavicka->zaciatok = pomocny;
-			pomocny->next = najlepsi->next;
-			novy->velkost = (-1) * size;
-			if (odstup != 0)
-			{
-				pomodst = hlavna_hlavicka->zaciatok;
-				for (a = 0; a < odstup - 1; a++)
-				{
-					pomodst = pomodst->next;
-				}
-				pomodst->next = pomocny;
-			}
-			//pomocny->velkost = pomocny->velkost - size - plna_hlavicka.
-			//pomocny->next = NULL;
-			//if ((char*)hlavna_hlavicka->zaciatok == (char*)novy) hlavna_hlavicka->zaciatok = pomocny;
-			return novy;
-		}
-
-		else
-		{
-			novy = najlepsi;
-			novy->velkost = (-1) * size;
-			pomocny = hlavna_hlavicka->zaciatok;
-			for (a = 0; a < odstup - 1; a++)
-			{
-				pomocny = pomocny->next;
-			}
-			pomocny->next = NULL;
-			return novy;
-		}
-	}
-	else return NULL;
-
-
-
-
-
+	return NULL;
 }
 
 int memory_free(void *valid_ptr)
 {
-	VOLNA_HLAVICKA *pomocny1, *pomocny2, *pomvol, *savepom;
 	MAIN_HLAVICKA *hlavna_hlavicka;
+	VOLNA_HLAVICKA *prev, *next, *pom, *pomvol;
 	PLNA_HLAVICKA *plny;
+	plny = (char*)valid_ptr - 8;
 	hlavna_hlavicka = (char*)start;
-	int velkost;
-	savepom = NULL;
-	plny = (char*)valid_ptr;
-	pomocny1 = (char*)valid_ptr;
-	velkost = (char*)plny->velkost;
-	pomvol = (char*)hlavna_hlavicka->zaciatok;
-	if (hlavna_hlavicka->zaciatok == NULL)
-	{
-		hlavna_hlavicka->zaciatok = pomocny1;
-		pomocny1->velkost = -velkost - 8;
-		return 0;
-	}
-	while ((char*)pomvol < (char*)pomocny1)
-	{
-		savepom = pomvol;
-		pomvol = pomvol->next;
-	}
-	pomocny1->next = pomvol;
-	if (savepom == NULL) hlavna_hlavicka->zaciatok = pomocny1;
-	else savepom->next = pomocny1;
-	pomocny1->velkost = -velkost - 8;
-
-		pomvol = hlavna_hlavicka->zaciatok;
-		while (pomvol->next != NULL)
+	prev = (char*)hlavna_hlavicka;
+	next = (char*)prev->next;
+	if (valid_ptr == NULL) return 1;
+	if (next != NULL)
+		while (((char*)next < (char*)plny) && ((char*)next != NULL))
 		{
-			if ((char*)pomvol->next == (char*)pomvol + pomvol->velkost + sizeof(VOLNA_HLAVICKA))
-			{
-				pomvol->velkost = pomvol->velkost + sizeof(VOLNA_HLAVICKA) + pomvol->next->velkost;
-				pomvol->next = pomvol->next->next;
-				printf("%d", pomvol->velkost);
-			}
-			else pomvol = pomvol->next;
+			prev = (char*)next;
+			next = (char*)next->next;
 		}
-		return 0;
+	pom = (char*)plny;
+	pom->next = (char*)next;
+	prev->next = (char*)pom;
+	pom->velkost = -(plny->velkost) - 8;
+
+	//zlucovanie
+	pomvol = (char*)hlavna_hlavicka->zaciatok;
+	while (pomvol->next != NULL)
+	{
+		if ((char*)pomvol->next == (char*)pomvol + pomvol->velkost + sizeof(VOLNA_HLAVICKA))
+		{
+			pomvol->velkost = pomvol->velkost + sizeof(VOLNA_HLAVICKA) + pomvol->next->velkost;
+			pomvol->next = (char*)pomvol->next->next;
+		}
+		else pomvol = (char*)pomvol->next;
+	}
+	return 0;
 }
+
 
 int memory_check(void *ptr)
 {
@@ -178,93 +140,22 @@ void memory_init(void *ptr, unsigned int size)
 int main()
 {
 	
-	
-	//printf("%d\n", sizeof(PLNA_HLAVICKA));
-	char region[500];
-	memory_init(region, 500);
-	char* pointer1 = (char*)memory_alloc(23);
-	char* pointer2 = (char*)memory_alloc(23);
-	char* pointer3 = (char*)memory_alloc(10);
-	char* pointer4 = (char*)memory_alloc(21);
-	char* pointer5 = (char*)memory_alloc(19);
-	char* pointer6 = (char*)memory_alloc(11);
-	char* pointer7 = (char*)memory_alloc(13);
-	char* pointer8 = (char*)memory_alloc(17);
-	char* pointer9 = (char*)memory_alloc(13);
-	char* pointer10 = (char*)memory_alloc(18);
-	char* pointer11 = (char*)memory_alloc(12);
-	char* pointer12 = (char*)memory_alloc(19);
-	char* pointer13 = (char*)memory_alloc(23);
-	/*char* pointer3 = (char*)memory_alloc(10);
-	char* pointer4 = (char*)memory_alloc(10);
-	char* pointer5 = (char*)memory_alloc(10);
-	char* pointer6 = (char*)memory_alloc(10);
-	char* pointer7 = (char*)memory_alloc(10);
-	char* pointer8 = (char*)memory_alloc(10);
-	char* pointer9 = (char*)memory_alloc(10);
-	char* pointer10 = (char*)memory_alloc(10);
-	printf("%s", pointer1);
-	printf("%s", pointer2);
-	printf("%s", pointer3);
-	printf("%s", pointer4);
-	printf("%s", pointer5);
-	printf("%s", pointer6);
-	printf("%s", pointer7);
-	printf("%s", pointer8);
-	printf("%s", pointer9);
-	printf("%s", pointer10);*/
-
-	//if (pointer)
-		//memset(pointer, 0, 10);
-
-	//printf("%d\n", sizeof(PLNA_HLAVICKA));
-	
-	if (pointer8)
-		memory_free(pointer8);
-	if (pointer9)
-		memory_free(pointer9);
-	if (pointer1)
-		memory_free(pointer1);
-	if (pointer2)
-		memory_free(pointer2);
+	char region[100];
+	memory_init(region, 100);
+	char* pointer1 = (char*)memory_alloc(8);
+	char* pointer2 = (char*)memory_alloc(8);
+	char* pointer3 = (char*)memory_alloc(8);
+	char* pointer4 = (char*)memory_alloc(8);
+	char* pointer5 = (char*)memory_alloc(8);
+	char* pointer6 = (char*)memory_alloc(8);
 	if (pointer3)
-		memory_free(pointer3);
-	if (pointer5)
-		memory_free(pointer5);
-	if (pointer10)
-		memory_free(pointer10);
-	if (pointer11)
-		memory_free(pointer11);
-	if (pointer12)
-		memory_free(pointer12);
-	if (pointer6)
-		memory_free(pointer6);
-	/*if (pointer7)
-		memory_free(pointer7);
-	if (pointer4)
-		memory_free(pointer4);
-	if (pointer13)
-		memory_free(pointer13);*/
-
-	char* pointer21 = (char*)memory_alloc(23);
-	char* pointer22 = (char*)memory_alloc(23);
-	char* pointer23 = (char*)memory_alloc(10);
-	char* pointer24 = (char*)memory_alloc(21);
-	char* pointer25 = (char*)memory_alloc(19);
-	char* pointer26 = (char*)memory_alloc(11);
-	char* pointer27 = (char*)memory_alloc(13);
-	char* pointer28 = (char*)memory_alloc(17);
-	char* pointer29 = (char*)memory_alloc(13);
-	char* pointer30 = (char*)memory_alloc(18);
-	char* pointer31 = (char*)memory_alloc(12);
-	char* pointer32 = (char*)memory_alloc(19);
-	char* pointer33 = (char*)memory_alloc(23);
-
-
-
-	//char* pointer3 = (char*)memory_alloc(10);
-	//char* pointer4 = (char*)memory_alloc(10);
-
+		if (memory_free(pointer3) == 0)
+			pointer3 = NULL;
+	char* pointer7 = (char*)memory_alloc(8);
+	char* pointer8 = (char*)memory_alloc(8);
+	char* pointer9 = (char*)memory_alloc(8);
+	char* pointer10 = (char*)memory_alloc(8);
+	char* pointer11 = (char*)memory_alloc(8);
 
 	return 0;
 }
