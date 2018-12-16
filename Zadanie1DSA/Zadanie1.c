@@ -24,6 +24,8 @@ typedef struct plna_hlavicka
 char *start;
 
 
+
+
 void *memory_alloc(unsigned int size)
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
@@ -136,10 +138,9 @@ void memory_init(void *ptr, unsigned int size)
 	hlavna_hlavicka->zaciatok = (char*)volna_hlavicka;
 }
 
-// Vlastna funkcia main() je pre vase osobne testovanie. Dolezite: pri testovacich scenaroch sa nebude spustat!
-int main()
+
+void test1()
 {
-	
 	char region[100];
 	memory_init(region, 100);
 	char* pointer1 = (char*)memory_alloc(8);
@@ -156,6 +157,79 @@ int main()
 	char* pointer9 = (char*)memory_alloc(8);
 	char* pointer10 = (char*)memory_alloc(8);
 	char* pointer11 = (char*)memory_alloc(8);
+	return 0;
+}
 
+void test2()
+{
+	char region[350];
+	memory_init(region, 350);
+	char* pointer1 = (char*)memory_alloc(59);
+	char* pointer2 = (char*)memory_alloc(65);
+	char* pointer3 = (char*)memory_alloc(17);
+	char* pointer4 = (char*)memory_alloc(19);
+	char* pointer5 = (char*)memory_alloc(85);
+	char* pointer6 = (char*)memory_alloc(8);
+	if (pointer1)
+		if (memory_free(pointer1) == 0)
+			pointer1 = NULL;
+	if (pointer4)
+		if (memory_free(pointer4) == 0)
+			pointer4 = NULL;
+	if (pointer6)
+		if (memory_free(pointer6) == 0)
+			pointer6 = NULL;
+	char* pointer7 = (char*)memory_alloc(18);
+	char* pointer8 = (char*)memory_alloc(18);
+	char* pointer9 = (char*)memory_alloc(18);
+	char* pointer10 = (char*)memory_alloc(18);
+	char* pointer11 = (char*)memory_alloc(18);
+	if (pointer8)
+		if (memory_free(pointer8) == 0)
+			pointer8 = NULL; 
+	if (pointer11)
+		if (memory_free(pointer11) == 0)
+			pointer11 = NULL;
+	if (pointer10)
+		if (memory_free(pointer10) == 0)
+			pointer10 = NULL;
+	char* pointer12 = (char*)memory_alloc(56);
+	char* pointer13 = (char*)memory_alloc(32);
+	char* pointer14 = (char*)memory_alloc(58);
+	char* pointer15 = (char*)memory_alloc(85);
+	char* pointer16 = (char*)memory_alloc(58);
+
+	return 0;
+}
+
+void test3()
+{
+	char region[100000];
+	memory_init(region, 100000);
+	char* pointer1 = (char*)memory_alloc(65595);
+	char* pointer2 = (char*)memory_alloc(25444);
+	char* pointer3 = (char*)memory_alloc(4823);
+	char* pointer4 = (char*)memory_alloc(25638);
+	if (pointer1)
+		if (memory_free(pointer1) == 0)
+			pointer1 = NULL;
+	if (pointer2)
+		if (memory_free(pointer2) == 0)
+			pointer2 = NULL;
+	if (pointer3)
+		if (memory_free(pointer3) == 0)
+			pointer3 = NULL;
+	if (pointer4)
+		if (memory_free(pointer4) == 0)
+			pointer4 = NULL;
+}
+
+
+// Vlastna funkcia main() je pre vase osobne testovanie. Dolezite: pri testovacich scenaroch sa nebude spustat!
+int main()
+{
+	test1();
+	//test2();
+	//test3();
 	return 0;
 }
