@@ -31,7 +31,7 @@ char *Start;
 
 
 
-
+//alokujem pamat vo volnom bloku (first fit)
 void *memory_alloc(unsigned int size)
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
@@ -44,6 +44,8 @@ void *memory_alloc(unsigned int size)
 	while (pom != NULL)
 	{
 		next = pom->next;
+
+	//mozu nastat 3 scenare:
 
 		//1 - zapisujem rovnako velke;
 		if (pom->velkost == sizeof(PLNA_HLAVICKA) * 2 + size)
@@ -84,6 +86,7 @@ void *memory_alloc(unsigned int size)
 	return NULL;
 }
 
+//zlucovanie susediacich volnych blokov
 void zlucovanie()
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
@@ -91,7 +94,7 @@ void zlucovanie()
 	hlavna_hlavicka = (char*)Start;
 	pomvol = (char*)hlavna_hlavicka->zaciatok;
 	while (pomvol->next != NULL)
-	{
+	{																							//procedura prechadza region od zaciatku po koniec a zlucuje vsetky susedne volne bloky
 		if ((char*)pomvol->next == (char*)pomvol + pomvol->velkost + sizeof(VOLNA_HLAVICKA))
 		{
 			pomvol->velkost = pomvol->velkost + sizeof(VOLNA_HLAVICKA) + pomvol->next->velkost;
@@ -101,12 +104,14 @@ void zlucovanie()
 	}
 }
 
+
+//Uvolnovanie pamate v bloku ktoreho smernik procedura dostane ako vstupny argument
 int memory_free(void *valid_ptr)
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
 	VOLNA_HLAVICKA *prev, *next, *pom, *pomvol;
 	PLNA_HLAVICKA *plny;
-	plny = (char*)valid_ptr - 8;							//uvolnujem pamat
+	plny = (char*)valid_ptr - 8;							//uvolnujem pamat :
 	hlavna_hlavicka = (char*)Start;
 	prev = (char*)hlavna_hlavicka;							
 	next = (char*)prev->next;
@@ -124,15 +129,6 @@ int memory_free(void *valid_ptr)
 
 	zlucovanie;
 	return 0;
-}
-
-
-int memory_check(void *ptr)
-{
-	PLNA_HLAVICKA *pompln;
-	pompln = ptr;
-	if (pompln->velkost < 0) return 1;
-	else return 0;
 }
 
 
