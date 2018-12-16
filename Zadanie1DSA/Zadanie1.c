@@ -4,24 +4,30 @@
 #include <string.h>
 #define MIN_ZAPIS 8
 
+
+//Hlavicka na zaciatku adresneho priestoru - udava celkovu velkost a smernik na prvy volny blok
 typedef struct main_hlavicka
 {
 	int velkost;
 	struct volna_hlavicka *zaciatok;
 }MAIN_HLAVICKA;
 
+
+//hlavicka volneho bloku - udava velkost volnej pamate v bloku a smernik na dalsi volny blok
 typedef struct volna_hlavicka
 {
 	int velkost;
 	struct volna_hlavicka *next;
 }VOLNA_HLAVICKA;
 
+
+//hlavicka plneho bloku - udava velkost zaplnenej pamate (v zapornom tvare)
 typedef struct plna_hlavicka
 {
 	int velkost;
 }PLNA_HLAVICKA;
 
-char *start;
+char *Start;
 
 
 
@@ -32,7 +38,7 @@ void *memory_alloc(unsigned int size)
 	VOLNA_HLAVICKA *pom, *prev, *next;
 	PLNA_HLAVICKA *plny;
 	
-	hlavna_hlavicka = (char*)start;
+	hlavna_hlavicka = (char*)Start;
 	pom = (char*)hlavna_hlavicka->zaciatok;
 	prev = (char*)hlavna_hlavicka;
 	while (pom != NULL)
@@ -83,19 +89,19 @@ int memory_free(void *valid_ptr)
 	MAIN_HLAVICKA *hlavna_hlavicka;
 	VOLNA_HLAVICKA *prev, *next, *pom, *pomvol;
 	PLNA_HLAVICKA *plny;
-	plny = (char*)valid_ptr - 8;
-	hlavna_hlavicka = (char*)start;
-	prev = (char*)hlavna_hlavicka;
+	plny = (char*)valid_ptr - 8;							//uvolnujem pamat
+	hlavna_hlavicka = (char*)Start;
+	prev = (char*)hlavna_hlavicka;							
 	next = (char*)prev->next;
 	if (valid_ptr == NULL) return 1;
 	if (next != NULL)
-		while (((char*)next < (char*)plny) && ((char*)next != NULL))
+		while (((char*)next < (char*)plny) && ((char*)next != NULL))			//najdem predchadzajuci a nasledujuci volny blok
 		{
 			prev = (char*)next;
 			next = (char*)next->next;
 		}
 	pom = (char*)plny;
-	pom->next = (char*)next;
+	pom->next = (char*)next;									//presmerujem smerniky volnych blokov
 	prev->next = (char*)pom;
 	pom->velkost = -(plny->velkost) - 8;
 
@@ -128,8 +134,8 @@ void memory_init(void *ptr, unsigned int size)
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
 	VOLNA_HLAVICKA *volna_hlavicka;
-	start = ptr;
-	hlavna_hlavicka = (char*)start;
+	Start = ptr;
+	hlavna_hlavicka = (char*)Start;
 	hlavna_hlavicka->velkost = size;
 	hlavna_hlavicka->zaciatok = NULL;
 	volna_hlavicka = (char*)hlavna_hlavicka + sizeof(MAIN_HLAVICKA);
@@ -225,11 +231,9 @@ void test3()
 }
 
 
-// Vlastna funkcia main() je pre vase osobne testovanie. Dolezite: pri testovacich scenaroch sa nebude spustat!
+
 int main()
 {
 	test1();
-	//test2();
-	//test3();
 	return 0;
 }
