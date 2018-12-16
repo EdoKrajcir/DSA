@@ -84,6 +84,23 @@ void *memory_alloc(unsigned int size)
 	return NULL;
 }
 
+void zlucovanie()
+{
+	MAIN_HLAVICKA *hlavna_hlavicka;
+	VOLNA_HLAVICKA *pomvol;
+	hlavna_hlavicka = (char*)Start;
+	pomvol = (char*)hlavna_hlavicka->zaciatok;
+	while (pomvol->next != NULL)
+	{
+		if ((char*)pomvol->next == (char*)pomvol + pomvol->velkost + sizeof(VOLNA_HLAVICKA))
+		{
+			pomvol->velkost = pomvol->velkost + sizeof(VOLNA_HLAVICKA) + pomvol->next->velkost;
+			pomvol->next = (char*)pomvol->next->next;
+		}
+		else pomvol = (char*)pomvol->next;
+	}
+}
+
 int memory_free(void *valid_ptr)
 {
 	MAIN_HLAVICKA *hlavna_hlavicka;
@@ -105,17 +122,7 @@ int memory_free(void *valid_ptr)
 	prev->next = (char*)pom;
 	pom->velkost = -(plny->velkost) - 8;
 
-	//zlucovanie
-	pomvol = (char*)hlavna_hlavicka->zaciatok;
-	while (pomvol->next != NULL)
-	{
-		if ((char*)pomvol->next == (char*)pomvol + pomvol->velkost + sizeof(VOLNA_HLAVICKA))
-		{
-			pomvol->velkost = pomvol->velkost + sizeof(VOLNA_HLAVICKA) + pomvol->next->velkost;
-			pomvol->next = (char*)pomvol->next->next;
-		}
-		else pomvol = (char*)pomvol->next;
-	}
+	zlucovanie;
 	return 0;
 }
 
